@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "osrs-items-api"
+version = "0.1.0"
+description = ""
+authors = ["k2bd"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^21.9b0"
+isort = "^5.9.3"
+flake8 = "^4.0.1"
+mypy = "^0.910"
+pytest-cov = "^3.0.0"
+poethepoet = "^0.10.0"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.poe.tasks]
+autoformat.sequence = [
+    {cmd = "black src tests"},
+    {cmd = "isort src tests"},
+]
+
+lint.sequence = [
+    {cmd = "black --check -v src tests"},
+    {cmd = "isort --check -v src tests"},
+    {cmd = "flake8 src tests"},
+    {cmd = "mypy --pretty src tests"},
+]
+
+[tool.poe.tasks.test]
+sequence = [
+    {shell = "docker-compose -p osrs-items-api-test up -d"},
+    {shell = "trap 'docker-compose -p osrs-items-api-test down' EXIT; pytest -vv --cov-report=xml --cov=osrs_items_api"},
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
