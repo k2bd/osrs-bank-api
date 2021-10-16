@@ -36,7 +36,7 @@ def tags_table(dynamodb_client):
 
 
 @pytest.fixture
-def tags_service(games_table) -> TagsService:
+def tags_service(tags_table) -> TagsService:
     """
     Return a service that can interact with a temporary games table
     """

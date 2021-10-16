@@ -105,19 +105,19 @@ def get_items_by_tag(name: str):
 
 
 @app.post("/tag/", response_model=Tag)
-def post_tag(itemId: int, name: str):
+def post_tag(itemId: int, groupName: str):
     """
     Post a single tag
     """
-    logger.info("POST /tag/ name=%s id=%s", name, itemId)
+    logger.info("POST /tag/ groupName=%s id=%s", groupName, itemId)
 
 
 @app.delete("/tag")
-def delete_tag(itemId: int, name: str):
+def delete_tag(itemId: int, groupName: str):
     """
     Delete a single tag
     """
-    logger.info("DELETE /tag/ name=%s id=%s", name, itemId)
+    logger.info("DELETE /tag/ groupName=%s id=%s", groupName, itemId)
 
 
 #: Handler for deploying to AWS Lambda

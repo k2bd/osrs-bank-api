@@ -10,7 +10,7 @@ local_table_spec = dict(
             "KeyType": "HASH",
         },
         {
-            "AttributeName": "name",
+            "AttributeName": "group_name",
             "KeyType": "SORT",
         },
     ],
@@ -20,7 +20,7 @@ local_table_spec = dict(
             "AttributeType": "N",
         },
         {
-            "AttributeName": "name",
+            "AttributeName": "group_name",
             "AttributeType": "S",
         },
     ],
@@ -33,7 +33,7 @@ local_table_spec = dict(
             "IndexName": BANK_TAGS_INDEX_NAME,
             "KeySchema": [
                 {
-                    "AttributeName": "name",
+                    "AttributeName": "group_name",
                     "KeyType": "HASH",
                 },
                 {

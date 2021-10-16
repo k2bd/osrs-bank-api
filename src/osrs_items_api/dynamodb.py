@@ -1,3 +1,6 @@
+from decimal import Decimal
+from typing import Any, Dict
+
 import boto3
 
 from osrs_items_api.constants import AWS_REGION, LOCAL_DYNAMODB_ENDPOINT
@@ -14,3 +17,20 @@ def dynamodb():
         raise EnvironmentError(msg)
 
     return boto3.resource("dynamodb", **config)
+
+
+def from_dynamodb(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert from Decimal to the appropriate numerical form, etc
+    """
+
+    def convert_value(value: Any) -> Any:
+        if isinstance(value, Decimal):
+            if int(value) == value:
+                return int(value)
+            else:
+                return float(value)
+        else:
+            return value
+
+    return {k: convert_value(v) for k, v in data.items()}

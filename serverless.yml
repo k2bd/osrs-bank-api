@@ -56,12 +56,12 @@ resources:
         KeySchema:
           - AttributeName: item_id
             KeyType: HASH
-          - AttributeName: name
+          - AttributeName: group_name
             KeyType: SORT
         AttributeDefinitions:
           - AttributeName: item_id
             AttributeType: "N"
-          - AttributeName: name
+          - AttributeName: group_name
             AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 2
@@ -69,7 +69,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: bank-tags
             KeySchema:
-              - AttributeName: name
+              - AttributeName: group_name
                 KeyType: HASH
               - AttributeName: item_id
                 KeyType: SORT

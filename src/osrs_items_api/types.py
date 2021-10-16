@@ -1,7 +1,9 @@
-from typing import Type, TypeVar
+from typing import Any, Dict, Type, TypeVar
 
 from fastapi_camelcase import CamelModel
 from osrsbox.items_api.item_properties import ItemProperties
+
+from osrs_items_api.dynamodb import from_dynamodb
 
 _T = TypeVar("_T")
 
@@ -10,6 +12,9 @@ class Item(CamelModel):
     """
     An item in OSRS
     """
+
+    class Config:
+        frozen = True
 
     #: Ingame ID of the item
     item_id: int
@@ -38,8 +43,15 @@ class Tag(CamelModel):
     An item tag
     """
 
+    class Config:
+        frozen = True
+
     #: Item ID the tag refers to
     item_id: int
 
-    #: Name of the tag
-    name: str
+    #: Name of the tag group
+    group_name: str
+
+    @classmethod
+    def from_dynamodb_item(cls: Type[_T], data: Dict[str, Any]) -> _T:
+        return Tag.parse_obj(from_dynamodb(data))

@@ -21,6 +21,7 @@ mypy = "^0.910"
 pytest-cov = "^3.0.0"
 poethepoet = "^0.10.0"
 uvicorn = "^0.15.0"
+requests = "^2.26.0"
 
 [tool.isort]
 profile = "black"
@@ -55,8 +56,8 @@ AWS_SECRET_ACCESS_KEY = "fake-secret-key"
 
 [tool.poe.tasks.local-server]
 sequence = [
-    {shell = "docker-compose up -d"},
-    {shell = "trap 'docker-compose down' EXIT; python scripts/create-local-table.py && uvicorn osrs_items_api.api:app --reload"},
+    {shell = "docker-compose -p osrs-items-local-server up -d"},
+    {shell = "trap 'docker-compose -p osrs-items-local-server down' EXIT; python scripts/create-local-table.py && uvicorn osrs_items_api.api:app --reload"},
 ]
 
 [tool.poe.tasks.local-server.env]
