@@ -6,6 +6,11 @@ authors = ["k2bd"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+fastapi = "^0.70.0"
+fastapi-camelcase = "^1.0.3"
+mangum = "^0.12.3"
+boto3 = "^1.18.62"
+osrsbox = "^2.2.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -15,6 +20,7 @@ flake8 = "^4.0.1"
 mypy = "^0.910"
 pytest-cov = "^3.0.0"
 poethepoet = "^0.10.0"
+uvicorn = "^0.15.0"
 
 [tool.isort]
 profile = "black"
@@ -22,8 +28,8 @@ multi_line_output = 3
 
 [tool.poe.tasks]
 autoformat.sequence = [
-    {cmd = "black src tests"},
-    {cmd = "isort src tests"},
+    {cmd = "black src tests scripts"},
+    {cmd = "isort src tests scripts"},
 ]
 
 lint.sequence = [
@@ -38,6 +44,28 @@ sequence = [
     {shell = "docker-compose -p osrs-items-api-test up -d"},
     {shell = "trap 'docker-compose -p osrs-items-api-test down' EXIT; pytest -vv --cov-report=xml --cov=osrs_items_api"},
 ]
+
+[tool.poe.tasks.test.env]
+OSRS_TAGS_TABLE_NAME = "tags"
+LOCAL_DYNAMODB_ENDPOINT = "http://localhost:8001"
+# Env vars required by boto3
+AWS_DEFAULT_REGION = "fake-region"
+AWS_ACCESS_KEY_ID = "fake-key"
+AWS_SECRET_ACCESS_KEY = "fake-secret-key"
+
+[tool.poe.tasks.local-server]
+sequence = [
+    {shell = "docker-compose up -d"},
+    {shell = "trap 'docker-compose down' EXIT; python scripts/create-local-table.py && uvicorn osrs_items_api.api:app --reload"},
+]
+
+[tool.poe.tasks.local-server.env]
+OSRS_TAGS_TABLE_NAME = "tags"
+LOCAL_DYNAMODB_ENDPOINT = "http://localhost:8001"
+# Env vars required by boto3
+AWS_DEFAULT_REGION = "fake-region"
+AWS_ACCESS_KEY_ID = "fake-key"
+AWS_SECRET_ACCESS_KEY = "fake-secret-key"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

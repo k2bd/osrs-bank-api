@@ -1,0 +1,88 @@
+service: osrs-items-api
+
+plugins:
+  - serverless-python-requirements
+  - serverless-api-gateway-throttling
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+provider:
+  name: aws
+  region: eu-west-2
+  runtime: python3.8
+  timeout: 30
+  environment:
+    OSRS_TAGS_TABLE_NAME: !Ref TagsTable
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DescribeTable
+      Resource:
+        - "Fn::GetAtt": ["ItemsTable", "Arn"]
+        - "Fn::Join": ['/', ["Fn::GetAtt": [ ItemsTable, Arn ], 'index', 'bank-tags']]
+
+functions:
+  api:
+    description: OSRS Items API
+    handler: osrs_items_api.api.handler
+    memorySize: 128
+    module: src
+    maximumRetryAttempts: 0
+    package:
+      include:
+        - ./src/**
+    events:
+      - http: ANY /
+      - http:
+          path: /{proxy+}
+          method: ANY
+
+resources:
+  Resources:
+    # DynamoDB tables
+    TagsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: osrs-item-tags-table-${opt:stage}
+        KeySchema:
+          - AttributeName: item_id
+            KeyType: HASH
+          - AttributeName: name
+            KeyType: SORT
+        AttributeDefinitions:
+          - AttributeName: item_id
+            AttributeType: "N"
+          - AttributeName: name
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+        GlobalSecondaryIndexes:
+          - IndexName: bank-tags
+            KeySchema:
+              - AttributeName: name
+                KeyType: HASH
+              - AttributeName: item_id
+                KeyType: SORT
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 2
+              WriteCapacityUnits: 2
+                
+
+custom:
+  # Configures throttling settings for the API Gateway stage
+  # They apply to all http endpoints, unless specifically overridden
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 50
+    maxConcurrentRequests: 50
