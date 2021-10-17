@@ -78,7 +78,6 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 2
               WriteCapacityUnits: 2
-                
 
 custom:
   # Configures throttling settings for the API Gateway stage
@@ -89,3 +88,4 @@ custom:
   pythonRequirements:
     noDeploy:
     - typing
+    - dataclasses
