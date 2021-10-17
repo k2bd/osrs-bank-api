@@ -27,8 +27,8 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DescribeTable
       Resource:
-        - "Fn::GetAtt": ["ItemsTable", "Arn"]
-        - "Fn::Join": ['/', ["Fn::GetAtt": [ ItemsTable, Arn ], 'index', 'bank-tags']]
+        - "Fn::GetAtt": ["TagsTable", "Arn"]
+        - "Fn::Join": ['/', ["Fn::GetAtt": [ TagsTable, Arn ], 'index', 'bank-tags']]
 
 functions:
   api:
