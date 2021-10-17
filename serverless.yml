@@ -12,7 +12,7 @@ package:
 provider:
   name: aws
   region: eu-west-2
-  runtime: python3.8
+  runtime: python3.9
   timeout: 30
   environment:
     OSRS_TAGS_TABLE_NAME: !Ref TagsTable

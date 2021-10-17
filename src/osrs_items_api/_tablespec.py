@@ -11,7 +11,7 @@ local_table_spec = dict(
         },
         {
             "AttributeName": "group_name",
-            "KeyType": "SORT",
+            "KeyType": "RANGE",
         },
     ],
     AttributeDefinitions=[
@@ -38,7 +38,7 @@ local_table_spec = dict(
                 },
                 {
                     "AttributeName": "item_id",
-                    "KeyType": "SORT",
+                    "KeyType": "RANGE",
                 },
             ],
             "Projection": {"ProjectionType": "ALL"},
