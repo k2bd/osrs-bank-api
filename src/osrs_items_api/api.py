@@ -89,9 +89,9 @@ def search_items(
 
     return ItemsSearchResult(
         total_count=total_count,
-        last_result_id=items[-1].item_id,
         items=items,
     )
+
 
 @app.get(
     "/item/{itemId}",
@@ -111,64 +111,131 @@ def get_item(itemId: int):
         )
 
 
-@app.get("item/{itemId}/related", response_model=List[Item])
+@app.get("/items/related/{itemId}", response_model=List[Item])
 def get_related_items(itemId: int):
     """
     Get all items related to the given main item
     """
-    logger.info("GET /item/%s/related", itemId)
+    logger.info("GET /items/related/%s", itemId)
     item = items_service.get_item(itemId)
     return list(items_service.related_items(item))
 
 
-@app.get("item/{itemId}/tags", response_model=List[Tag])
+@app.get("/tags/item/{itemId}", response_model=List[Tag])
 def get_item_tags(itemId: int):
     """
     Get the tags related to an item
     """
-    logger.info("GET /item/%s/tags", itemId)
+    logger.info("GET /tags/item/%s", itemId)
     tags_service = TagsService()
     item = items_service.get_item(item_id=itemId)
     return tags_service.get_tags_by_item(item)
 
 
-@app.get("/tag/{groupName}/items", response_model=List[Item])
-def get_items_by_tag(groupName: str):
+@app.get("/items/tag/{groupName}", response_model=List[Item])
+def get_items_by_tag(groupName: str, includeRelated: Optional[bool] = False):
     """
-    Get items related to a given tag name
+    Get items that belong to a tag group
     """
-    logger.info("GET /tag/%s/items", groupName)
+    logger.info("GET /items/tag/%s", groupName)
     tags_service = TagsService()
     tags = tags_service.get_tags_by_group_name(groupName)
-    return [items_service.get_item(tag.item_id) for tag in tags]
+    items = list(
+        items_service.filter_main_items(
+            (items_service.get_item(tag.item_id) for tag in tags)
+        )
+    )
+
+    if includeRelated:
+        new_items = []
+        for item in items:
+            new_items.extend(items_service.related_items(item))
+        items += new_items
+
+    return items
 
 
-@app.post("/tag", response_model=Tag)
-def post_tag(itemId: int, groupName: str):
+def _add_tag(
+    tags_service: TagsService, tag: Tag, include_related: Optional[bool] = False
+):
+    tags = [tag]
+    if include_related:
+        item = items_service.get_item(tag.item_id)
+        tags.extend(
+            Tag(item_id=item.item_id, group_name=tag.group_name)
+            for item in items_service.related_items(item)
+        )
+        logger.info("Including %s", tags)
+
+    return [tags_service.add_tag(t) for t in tags]
+
+
+@app.post("/tag", response_model=List[Tag])
+def post_tag(tag: Tag, includeRelated: Optional[bool] = False):
     """
     Post a single tag
     """
-    logger.info("POST /tag/ groupName=%s id=%s", groupName, itemId)
-    tag = Tag(
-        item_id=itemId,
-        group_name=groupName,
-    )
+    logger.info("POST /tag/ tag=%s", tag)
+    return _add_tag(tags_service=TagsService(), tag=tag, include_related=includeRelated)
+
+
+@app.post("/tags", response_model=List[Tag])
+def post_tags(tags: List[Tag], includeRelated: Optional[bool] = False):
+    """
+    Post several tags
+    """
+    logger.info("POST /tags/ tags=%s", tags)
     tags_service = TagsService()
-    return tags_service.add_tag(tag)
+
+    result = []
+    for tag in tags:
+        result.extend(
+            _add_tag(tags_service=tags_service, tag=tag, include_related=includeRelated)
+        )
 
 
-@app.delete("/tag")
-def delete_tag(itemId: int, groupName: str):
+def _delete_tag(
+    tags_service: TagsService, tag: Tag, include_related: Optional[bool] = False
+):
+    tags = [tag]
+    if include_related:
+        item = items_service.get_item(tag.item_id)
+        tags.extend(
+            Tag(item_id=item.item_id, group_name=tag.group_name)
+            for item in items_service.related_items(item)
+        )
+        logger.info("Including %s", tags)
+
+    return [tags_service.delete_tag(t) for t in tags]
+
+
+@app.delete("/tag", response_model=List[Tag])
+def delete_tag(tag: Tag, includeRelated: Optional[bool] = False):
     """
     Delete a single tag
     """
-    logger.info("DELETE /tag/ groupName=%s id=%s", groupName, itemId)
-    tag = Tag(
-        item_id=itemId,
-        group_name=groupName,
+    logger.info("DELETE /tag/ tag=%s", tag)
+    return _delete_tag(
+        tags_service=TagsService(), tag=tag, include_related=includeRelated
     )
+
+
+@app.delete("/tags", response_model=List[Tag])
+def delete_tags(tags: List[Tag], includeRelated: Optional[bool] = False):
+    """
+    Delete several tags
+    """
+    logger.info("DELETE /tags/ tags=%s", tags)
     tags_service = TagsService()
-    return tags_service.delete_tag(tag)
+
+    result = []
+    for tag in tags:
+        result.extend(
+            _delete_tag(
+                tags_service=tags_service, tag=tag, include_related=includeRelated
+            )
+        )
+
 
 @app.get("/tagGroups", response_model=List[str])
 def search_tag_groups(nameLike: Optional[str] = None):

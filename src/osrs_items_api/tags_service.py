@@ -4,7 +4,10 @@ from boto3.dynamodb.conditions import Key
 
 from osrs_items_api.constants import BANK_TAGS_INDEX_NAME, TAGS_TABLE_NAME
 from osrs_items_api.dynamodb import dynamodb
+from osrs_items_api.logging import get_logger
 from osrs_items_api.types import Item, Tag
+
+logger = get_logger()
 
 
 class TagsService:
@@ -16,6 +19,7 @@ class TagsService:
         """
         Idempotently add a new tag to an item
         """
+        logger.info("Creating %s", tag)
         tag = Tag(
             item_id=tag.item_id,
             group_name=tag.group_name,
@@ -45,6 +49,7 @@ class TagsService:
         """
         Idempotently remove a tag from an item
         """
+        logger.info("Deleting %s", tag)
         self.tags_table.delete_item(
             Key=dict(
                 item_id=tag.item_id,
