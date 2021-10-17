@@ -57,7 +57,7 @@ resources:
           - AttributeName: item_id
             KeyType: HASH
           - AttributeName: group_name
-            KeyType: SORT
+            KeyType: RANGE
         AttributeDefinitions:
           - AttributeName: item_id
             AttributeType: "N"
@@ -72,7 +72,7 @@ resources:
               - AttributeName: group_name
                 KeyType: HASH
               - AttributeName: item_id
-                KeyType: SORT
+                KeyType: RANGE
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
