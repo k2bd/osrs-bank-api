@@ -86,3 +86,6 @@ custom:
   apiGatewayThrottling:
     maxRequestsPerSecond: 50
     maxConcurrentRequests: 50
+  pythonRequirements:
+    noDeploy:
+    - typing
