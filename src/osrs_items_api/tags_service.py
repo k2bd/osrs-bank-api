@@ -81,3 +81,21 @@ class TagsService:
             return []
 
         return [Tag.from_dynamodb_item(result) for result in result["Items"]]
+
+    def get_tag_groups(self, name_like: Optional[str] = None) -> List[str]:
+        """
+        Get all tag groups
+
+        TODO: Currently does a full table scan!!
+        """
+        # TODO: paginate and lazily yield results
+        result = self.tags_table.scan()
+        if "Items" not in result:
+            return []
+
+        tags: List[str] = list({item["group_name"] for item in result["Items"]})
+
+        if name_like:
+            tags = [tag for tag in tags if name_like.lower() in tag.lower()]
+
+        return tags

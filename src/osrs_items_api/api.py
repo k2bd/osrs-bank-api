@@ -45,7 +45,7 @@ class ItemsSearchResult(CamelModel):
 @app.get("/items", response_model=ItemsSearchResult)
 def search_items(
     itemId: Optional[int] = None,
-    nameLike: Optional[str] = "",
+    nameLike: Optional[str] = None,
     includeMembers: bool = True,
     limit: Optional[int] = None,
     offset: Optional[int] = None,
@@ -169,6 +169,14 @@ def delete_tag(itemId: int, groupName: str):
     )
     tags_service = TagsService()
     return tags_service.delete_tag(tag)
+
+@app.get("/tagGroups", response_model=List[str])
+def search_tag_groups(nameLike: Optional[str] = None):
+    """
+    Get tag group names
+    """
+    tags_service = TagsService()
+    return tags_service.get_tag_groups(name_like=nameLike)
 
 
 #: Handler for deploying to AWS Lambda
