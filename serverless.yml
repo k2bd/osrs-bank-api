@@ -34,7 +34,7 @@ functions:
   api:
     description: OSRS Items API
     handler: osrs_items_api.api.handler
-    memorySize: 128
+    memorySize: 512
     module: src
     maximumRetryAttempts: 0
     package:
