@@ -147,7 +147,7 @@ def get_items_by_tag(groupName: str, includeRelated: Optional[bool] = False):
     )
 
     if includeRelated:
-        new_items = []
+        new_items: List[Item] = []
         for item in items:
             new_items.extend(items_service.related_items(item))
         items += new_items
