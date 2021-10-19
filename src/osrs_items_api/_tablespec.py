@@ -24,7 +24,10 @@ local_table_spec = dict(
             "AttributeType": "S",
         },
     ],
-    BillingMode="PAY_PER_REQUEST",
+    ProvisionedThroughput={
+        "ReadCapacityUnits": 2,
+        "WriteCapacityUnits": 2,
+    },
     GlobalSecondaryIndexes=[
         {
             "IndexName": BANK_TAGS_INDEX_NAME,
@@ -39,7 +42,10 @@ local_table_spec = dict(
                 },
             ],
             "Projection": {"ProjectionType": "ALL"},
-            "BillingMode": "PAY_PER_REQUEST",
+            "ProvisionedThroughput": {
+                "ReadCapacityUnits": 2,
+                "WriteCapacityUnits": 2,
+            },
         }
     ],
 )
