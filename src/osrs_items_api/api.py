@@ -7,9 +7,10 @@ from mangum import Mangum
 from starlette.responses import JSONResponse
 
 from osrs_items_api import items_service
+from osrs_items_api import tags_service
 from osrs_items_api.logging import get_logger
 from osrs_items_api.tags_service import TagsService
-from osrs_items_api.types import Item, Tag
+from osrs_items_api.types import Item, Tag, TagGroup
 
 logger = get_logger()
 
@@ -33,6 +34,8 @@ class ErrorMessage(CamelModel):
 # TODO: invert into app builder that accepts services that fill some interface
 #       so e.g. we can unit test without needing docker
 
+# TODO: Async API
+
 
 class ItemsSearchResult(CamelModel):
     #: Total number of items in the search result
@@ -50,6 +53,7 @@ def search_items(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
     includeRelated: bool = False,
+    hasTags: Optional[str] = None,
 ):
     """
     Search for items given some search criteria
@@ -69,6 +73,20 @@ def search_items(
     if not includeMembers:
         logger.info("Filtering by non-members items")
         items = [item for item in items if not item.members]
+
+    if hasTags:
+        tags_set = set(hasTags.split(","))
+        logger.info("Filtering by tags")
+        tags_service = TagsService()
+        item_tags = {
+            item.item_id: {
+                tag.group_name for tag in tags_service.get_tags_by_item(item)
+            }
+            for item in items
+        }
+        items = [item for item in items if tags_set <= item_tags[item.item_id]]
+
+    # -- Add related
 
     if includeRelated:
         logger.info("Adding related items")
@@ -237,13 +255,75 @@ def delete_tags(tags: List[Tag], includeRelated: Optional[bool] = False):
         )
 
 
-@app.get("/tagGroups", response_model=List[str])
+@app.get("/tagGroups", response_model=List[str], deprecated=True)
 def search_tag_groups(nameLike: Optional[str] = None):
     """
     Get tag group names
     """
     tags_service = TagsService()
-    return tags_service.get_tag_groups(name_like=nameLike)
+    groups = [tag_group.group_name for tag_group in tags_service.all_tag_groups()]
+    if nameLike:
+        groups = [group for group in groups if nameLike.lower() in group.lower()]
+    return groups
+
+
+@app.get("/group/{groupName}", response_model=TagGroup)
+def delete_group(groupName: str):
+    """
+    Get a tag group
+    """
+    tags_service = TagsService()
+    return tags_service.get_tag_group(groupName)
+
+
+@app.delete("/group", response_model=TagGroup)
+def delete_group(group: TagGroup):
+    """
+    Delete a tag group and all connected tags
+    """
+    tags_service = TagsService()
+    tags_service.delete_tag_group(group, delete_tags=True)
+    return group
+
+
+@app.put("/group", response_model=TagGroup)
+def put_group(group: TagGroup):
+    """
+    Create/update a group
+    """
+    logger.info("Putting tag group: %s", group)
+    tags_service = TagsService()
+    tags_service.add_tag_group(group)
+    return group
+
+
+@app.get("/groups", response_model=List[TagGroup])
+def search_groups(nameLike: Optional[str] = None, hasItems: Optional[str] = None):
+    """
+    Get tag groups
+    """
+    tags_service = TagsService()
+    groups = tags_service.all_tag_groups()
+
+    if nameLike:
+        groups = [
+            group for group in groups if nameLike.lower() in group.group_name.lower()
+        ]
+
+    if hasItems is not None:
+        items_set = {int(item_id) for item_id in hasItems.split(",")}
+        group_tags = {
+            group.group_name: {
+                tag.item_id
+                for tag in tags_service.get_tags_by_group_name(group.group_name)
+            }
+            for group in groups
+        }
+        groups = [
+            group for group in groups if items_set <= group_tags[group.group_name]
+        ]
+
+    return groups
 
 
 #: Handler for deploying to AWS Lambda

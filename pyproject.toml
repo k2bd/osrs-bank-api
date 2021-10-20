@@ -49,6 +49,7 @@ sequence = [
 
 [tool.poe.tasks.test.env]
 OSRS_TAGS_TABLE_NAME = "tags"
+OSRS_TAG_GROUPS_TABLE_NAME = "tag_groups"
 LOCAL_DYNAMODB_ENDPOINT = "http://localhost:8001"
 # Env vars required by boto3
 AWS_DEFAULT_REGION = "fake-region"
@@ -63,6 +64,7 @@ sequence = [
 
 [tool.poe.tasks.local-server.env]
 OSRS_TAGS_TABLE_NAME = "tags"
+OSRS_TAG_GROUPS_TABLE_NAME = "tag_groups"
 LOCAL_DYNAMODB_ENDPOINT = "http://localhost:8001"
 # Env vars required by boto3
 AWS_DEFAULT_REGION = "fake-region"

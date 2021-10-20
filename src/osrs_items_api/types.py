@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, Dict, Optional, Type, TypeVar
 
 from fastapi_camelcase import CamelModel
 from osrsbox.items_api.item_properties import ItemProperties
@@ -6,6 +6,12 @@ from osrsbox.items_api.item_properties import ItemProperties
 from osrs_items_api.dynamodb import from_dynamodb
 
 _T = TypeVar("_T")
+
+
+class DynamoDBModel(CamelModel):
+    @classmethod
+    def from_dynamodb_item(cls: Type[_T], data: Dict[str, Any]) -> _T:
+        return cls.parse_obj(from_dynamodb(data))
 
 
 class Item(CamelModel):
@@ -38,7 +44,7 @@ class Item(CamelModel):
         )
 
 
-class Tag(CamelModel):
+class Tag(DynamoDBModel):
     """
     An item tag
     """
@@ -52,6 +58,20 @@ class Tag(CamelModel):
     #: Name of the tag group
     group_name: str
 
-    @classmethod
-    def from_dynamodb_item(cls: Type[_T], data: Dict[str, Any]) -> _T:
-        return Tag.parse_obj(from_dynamodb(data))
+
+class TagGroup(DynamoDBModel):
+    """
+    Info about a tag group
+    """
+
+    class Config:
+        frozen = True
+
+    #: Group name
+    group_name: str
+
+    #: Description
+    description: Optional[str]
+
+    #: ID of the icon item
+    item_icon_id: Optional[int]

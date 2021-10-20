@@ -16,6 +16,7 @@ provider:
   timeout: 60
   environment:
     OSRS_TAGS_TABLE_NAME: !Ref TagsTable
+    OSRS_TAG_GROUPS_TABLE_NAME: !Ref GroupsTable
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -29,6 +30,7 @@ provider:
       Resource:
         - "Fn::GetAtt": ["TagsTable", "Arn"]
         - "Fn::Join": ['/', ["Fn::GetAtt": [ TagsTable, Arn ], 'index', 'bank-tags']]
+        - "Fn::GetAtt": ["GroupsTable", "Arn"]
 
 functions:
   api:
@@ -73,6 +75,17 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+    GroupsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: osrs-tag-groups-table-${opt:stage}
+        KeySchema:
+          - AttributeName: group_name
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: group_name
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
 
 custom:
   # Configures throttling settings for the API Gateway stage
