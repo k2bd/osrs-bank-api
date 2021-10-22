@@ -130,7 +130,7 @@ class TagsService:
 
         return [TagGroup.from_dynamodb_item(result) for result in result["Items"]]
 
-    def delete_tag_group(self, group: TagGroup, delete_tags = True) -> TagGroup:
+    def delete_tag_group(self, group: TagGroup, delete_tags=True) -> TagGroup:
         """
         Delete a tag group and optionally delete all tags with that group name
         """

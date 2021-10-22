@@ -6,8 +6,7 @@ from fastapi_camelcase import CamelModel
 from mangum import Mangum
 from starlette.responses import JSONResponse
 
-from osrs_items_api import items_service
-from osrs_items_api import tags_service
+from osrs_items_api import items_service, tags_service
 from osrs_items_api.logging import get_logger
 from osrs_items_api.tags_service import TagsService
 from osrs_items_api.types import Item, Tag, TagGroup
@@ -96,8 +95,10 @@ def search_items(
             }
             for item in tagged_items
         }
-        ok_items = [item for item in tagged_items if tags_set <= item_tags[item.item_id]]
-        
+        ok_items = [
+            item for item in tagged_items if tags_set <= item_tags[item.item_id]
+        ]
+
         items = [item for item in items if item in ok_items]
 
     # -- Add related

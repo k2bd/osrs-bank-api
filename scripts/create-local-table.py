@@ -1,7 +1,11 @@
 import boto3
 
-from osrs_items_api._tablespec import tags_table, tag_groups_table
-from osrs_items_api.constants import LOCAL_DYNAMODB_ENDPOINT, TAG_GROUPS_TABLE_NAME, TAGS_TABLE_NAME
+from osrs_items_api._tablespec import tag_groups_table, tags_table
+from osrs_items_api.constants import (
+    LOCAL_DYNAMODB_ENDPOINT,
+    TAG_GROUPS_TABLE_NAME,
+    TAGS_TABLE_NAME,
+)
 
 
 def make_tags_table():
@@ -23,6 +27,7 @@ def make_tags_table():
 
     exists_waiter = dynamodb_client.get_waiter("table_exists")
     exists_waiter.wait(TableName=TAGS_TABLE_NAME)
+
 
 def make_tag_groups_table():
     """

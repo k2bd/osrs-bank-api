@@ -54,6 +54,7 @@ def test_search_items_200_4(api_client: TestClient):
     assert result.status_code == 200
     assert_expected_items_json(result.json(), [])
 
+
 def test_search_items_200_5(tags_service: TagsService, api_client: TestClient):
     """
     GET /items OK
@@ -66,9 +67,7 @@ def test_search_items_200_5(tags_service: TagsService, api_client: TestClient):
     tags_service.add_tag(Tag(item_id=789, group_name="A"))
     tags_service.add_tag(Tag(item_id=789, group_name="B"))
 
-    result = api_client.get(
-        f"/items?hasTags=A,C"
-    )
+    result = api_client.get("/items?hasTags=A,C")
     assert result.status_code == 200
     assert_expected_items_json(result.json(), [456])
 

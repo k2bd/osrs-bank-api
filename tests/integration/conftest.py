@@ -2,9 +2,13 @@ import boto3
 import pytest
 from fastapi.testclient import TestClient
 
-from osrs_items_api._tablespec import tags_table, tag_groups_table
+from osrs_items_api._tablespec import tag_groups_table, tags_table
 from osrs_items_api.api import app
-from osrs_items_api.constants import LOCAL_DYNAMODB_ENDPOINT, TAG_GROUPS_TABLE_NAME, TAGS_TABLE_NAME
+from osrs_items_api.constants import (
+    LOCAL_DYNAMODB_ENDPOINT,
+    TAG_GROUPS_TABLE_NAME,
+    TAGS_TABLE_NAME,
+)
 from osrs_items_api.tags_service import TagsService
 
 

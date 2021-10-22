@@ -1,4 +1,8 @@
-from osrs_items_api.constants import BANK_TAGS_INDEX_NAME, TAG_GROUPS_TABLE_NAME, TAGS_TABLE_NAME
+from osrs_items_api.constants import (
+    BANK_TAGS_INDEX_NAME,
+    TAG_GROUPS_TABLE_NAME,
+    TAGS_TABLE_NAME,
+)
 
 #: In-code source for the dynamodb table spec, for testing and
 #: local scripts etc.
