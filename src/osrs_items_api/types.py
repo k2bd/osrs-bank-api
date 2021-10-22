@@ -2,15 +2,17 @@ from typing import Any, Dict, Optional, Type, TypeVar
 
 from fastapi_camelcase import CamelModel
 from osrsbox.items_api.item_properties import ItemProperties
+from pydantic.main import BaseModel
 
 from osrs_items_api.dynamodb import from_dynamodb
 
 _T = TypeVar("_T")
+_P = TypeVar("_P", bound=BaseModel)
 
 
 class DynamoDBModel(CamelModel):
     @classmethod
-    def from_dynamodb_item(cls: Type[_T], data: Dict[str, Any]) -> _T:
+    def from_dynamodb_item(cls: Type[_P], data: Dict[str, Any]) -> _P:
         return cls.parse_obj(from_dynamodb(data))
 
 

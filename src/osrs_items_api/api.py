@@ -6,7 +6,7 @@ from fastapi_camelcase import CamelModel
 from mangum import Mangum
 from starlette.responses import JSONResponse
 
-from osrs_items_api import items_service, tags_service
+from osrs_items_api import items_service
 from osrs_items_api.logging import get_logger
 from osrs_items_api.tags_service import TagsService
 from osrs_items_api.types import Item, Tag, TagGroup
@@ -278,7 +278,7 @@ def search_tag_groups(nameLike: Optional[str] = None):
 
 
 @app.get("/group/{groupName}", response_model=TagGroup)
-def delete_group(groupName: str):
+def get_group(groupName: str):
     """
     Get a tag group
     """
