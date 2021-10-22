@@ -45,6 +45,15 @@ class ItemsSearchResult(CamelModel):
     items: List[Item]
 
 
+def _get_items_by_tag(tags_service: TagsService, tag_name: str) -> List[Item]:
+    tags = tags_service.get_tags_by_group_name(tag_name)
+    return list(
+        items_service.filter_main_items(
+            (items_service.get_item(tag.item_id) for tag in tags)
+        )
+    )
+
+
 @app.get("/items", response_model=ItemsSearchResult)
 def search_items(
     itemId: Optional[int] = None,
@@ -78,13 +87,18 @@ def search_items(
         tags_set = set(hasTags.split(","))
         logger.info("Filtering by tags")
         tags_service = TagsService()
+        tagged_items = set()
+        for tag_name in tags_set:
+            tagged_items |= set(_get_items_by_tag(tags_service, tag_name))
         item_tags = {
             item.item_id: {
                 tag.group_name for tag in tags_service.get_tags_by_item(item)
             }
-            for item in items
+            for item in tagged_items
         }
-        items = [item for item in items if tags_set <= item_tags[item.item_id]]
+        ok_items = [item for item in tagged_items if tags_set <= item_tags[item.item_id]]
+        
+        items = [item for item in items if item in ok_items]
 
     # -- Add related
 
@@ -157,12 +171,7 @@ def get_items_by_tag(groupName: str, includeRelated: Optional[bool] = False):
     """
     logger.info("GET /items/tag/%s", groupName)
     tags_service = TagsService()
-    tags = tags_service.get_tags_by_group_name(groupName)
-    items = list(
-        items_service.filter_main_items(
-            (items_service.get_item(tag.item_id) for tag in tags)
-        )
-    )
+    items = _get_items_by_tag(tags_service, groupName)
 
     if includeRelated:
         new_items: List[Item] = []
